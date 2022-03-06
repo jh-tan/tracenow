@@ -1,10 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
+import 'package:tracenow/services/ble_trace.dart';
 import 'package:tracenow/services/firebase_auth.dart';
 import 'package:tracenow/services/firebase_db.dart';
 import 'package:tracenow/widgets/category_menu_list.dart';
 import 'package:tracenow/widgets/homepage_appbar.dart';
+import 'package:tracenow/widgets/snackbar.dart';
 
 class HomepageBody extends StatefulWidget {
   const HomepageBody({Key? key}) : super(key: key);
@@ -15,6 +17,10 @@ class HomepageBody extends StatefulWidget {
 
 class _HomepageBodyState extends State<HomepageBody> {
   String userID = '', userStatus = '', name = '';
+  Color? iconColor = Colors.black, bgColor = Colors.red;
+  String text = "The tracer is not activated";
+  bool servicesIsRunning = false;
+  final TracingServices tracingServices = TracingServices();
 
   @override
   void initState() {
@@ -49,24 +55,51 @@ class _HomepageBodyState extends State<HomepageBody> {
                   Container(
                       margin: EdgeInsets.only(left: 5.w),
                       padding: const EdgeInsets.all(10.0),
-                      decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                      decoration: BoxDecoration(color: bgColor, shape: BoxShape.circle),
                       child: IconButton(
                         icon: const Icon(Icons.bluetooth_outlined),
                         iconSize: 13.w,
-                        color: Colors.black,
-                        onPressed: () {},
+                        color: iconColor,
+                        onPressed: () async {
+                          if (servicesIsRunning) {
+                            tracingServices.stopService();
+                            _stateChange();
+                          } else {
+                            String status = await tracingServices.checkStatus();
+                            if (status != "True") {
+                              GlobalSnackBar().show(context, status);
+                            } else {
+                              tracingServices.startService(userID);
+                              _stateChange();
+                            }
+                          }
+                        },
                       )),
                   Expanded(
                       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 3.w),
-                      child:
-                          Text("The Bluetooth is not activated", style: TextStyle(fontSize: 14.sp)),
+                      child: Text(text, style: TextStyle(fontSize: 14.sp)),
                     ),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 3.w),
-                      child: Text("0 person interacted", style: TextStyle(fontSize: 14.sp)),
-                    ),
+                    ValueListenableBuilder(
+                        valueListenable: tracingServices.getDevicesNum(),
+                        builder: (context, value, widget) {
+                          if (tracingServices.getContactList().length > 1) {
+                            return Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 3.w),
+                                child: Text(
+                                  '${tracingServices.getContactList().length} persons interacted',
+                                  style: TextStyle(fontSize: 14.sp),
+                                ));
+                          } else {
+                            return Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 3.w),
+                                child: Text(
+                                  '${tracingServices.getContactList().length} person interacted',
+                                  style: TextStyle(fontSize: 14.sp),
+                                ));
+                          }
+                        }),
                   ]))
                 ]),
                 SizedBox(height: 5.h),
@@ -118,6 +151,16 @@ class _HomepageBodyState extends State<HomepageBody> {
           name = data["name"];
         });
       }
+    });
+  }
+
+  void _stateChange() async {
+    servicesIsRunning = await tracingServices.isRunning();
+
+    setState(() {
+      bgColor = servicesIsRunning ? Colors.green : Colors.red;
+      iconColor = servicesIsRunning ? Colors.white : Colors.black;
+      text = servicesIsRunning ? "The tracer is running" : "The tracer is not activated";
     });
   }
 }
