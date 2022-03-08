@@ -26,7 +26,7 @@ class TracingServices {
         await beaconBroadcast.checkTransmissionSupported();
 
     switch (transmissionSupportStatus) {
-      // You're good to go, you can advertise as a beacon
+      // Good to go, can advertise as a beacon
       case BeaconStatus.supported:
         beaconBroadcast
             .setUUID(UserID)
@@ -36,11 +36,11 @@ class TracingServices {
             .setManufacturerId(0x004c)
             .start();
         break;
-      // Your device doesn't support BLE
+      // Device doesn't support BLE
       case BeaconStatus.notSupportedBle:
         print("NOT supported");
         break;
-      // Either your chipset or driver is incompatible
+      // Either chipset or driver is incompatible
       case BeaconStatus.notSupportedCannotGetAdvertiser:
         print("CANNOT GET ADVER");
         break;
@@ -102,7 +102,12 @@ class TracingServices {
     bool bluetoothIsOn = await FlutterBlue.instance.isOn;
     bool locationIsOn = await Permission.locationWhenInUse.serviceStatus.isEnabled;
 
-    if (bluetoothIsOn && locationIsOn && permissionIsGranted) {
+    if (!permissionIsGranted) {
+      await Permission.location.request();
+      if (await Permission.location.isDenied) return "Please allow the permission for Location";
+    }
+
+    if (bluetoothIsOn && locationIsOn) {
       return "True";
     } else if (!locationIsOn && !bluetoothIsOn) {
       return "Please turn on your Location and Bluetooth";
@@ -110,8 +115,6 @@ class TracingServices {
       return "Please turn on your Bluetooth";
     } else if (!locationIsOn) {
       return "Please turn on your Location";
-    } else if (!permissionIsGranted) {
-      return "Please allow the permission for Location";
     }
 
     return "Your device may not support BLE";
@@ -149,15 +152,15 @@ class TracingServices {
         int duration = (DateTime.now().millisecondsSinceEpoch / 1000).round() - value;
 
         if (dbInfo.isEmpty) {
-          // Info info = Info(uuid: key, date: encounterDate, duration: duration);
+          Info info = Info(uuid: key, date: encounterDate, duration: duration);
           debugPrint("First encounter , Duration: $duration ");
-          // await db.insert(info);
+          await db.insert(info);
         } else {
           int newDuration = dbInfo.first.duration + duration;
           Info info = Info(uuid: key, date: encounterDate, duration: newDuration);
           debugPrint(
               "Update encounter , current duration $duration,  Updated duration: $newDuration");
-          // await db.update(info);
+          await db.update(info);
         }
       } else {
         noChanges = !noChanges;

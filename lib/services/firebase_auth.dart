@@ -23,6 +23,10 @@ class FirebaseAuthentication {
     return _firebaseAuth.currentUser!.uid.toString();
   }
 
+  String? getCurrentUserPhoneNo() {
+    return _firebaseAuth.currentUser!.phoneNumber;
+  }
+
   Future<void> signOut() async {
     await _firebaseAuth.signOut();
   }

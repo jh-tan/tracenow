@@ -11,11 +11,14 @@ class GlobalSnackBar {
       ..showSnackBar(SnackBar(
         duration: const Duration(seconds: 3),
         content: SizedBox(
-          height: 5.h,
-          child: Center(
-            child: Text(
-              message,
-              style: TextStyle(fontSize: 16.sp),
+          height: 4.h,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Center(
+              child: Text(
+                message,
+                style: TextStyle(fontSize: 14.sp),
+              ),
             ),
           ),
         ),

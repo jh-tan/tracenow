@@ -137,4 +137,10 @@ class DatabaseHelper {
     //   );
     // });
   }
+
+    Future<int> insertDummyDate(Info info) async {
+    Database? db = await database;
+    int id = await db!.insert('EncounterHistory', info.toMap());
+    return id;
+  } 
 }

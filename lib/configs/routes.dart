@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tracenow/screens/homepage.dart';
 import 'package:tracenow/models/arguments.dart';
 import 'package:tracenow/screens/login.dart';
-// import 'package:tracenow/screens/history.dart';
+import 'package:tracenow/screens/history.dart';
 import 'package:tracenow/screens/onboard.dart';
 import 'package:tracenow/screens/otp.dart';
 import 'package:tracenow/screens/register.dart';
@@ -13,7 +13,7 @@ class Routes {
       'HomePage': (_) => const Homepage(),
       'Login': (_) => const Login(),
       'OnBoard': (_) => const OnBoard(),
-      // 'History': (_) => const History(),
+      'History': (_) => const History(),
     };
   }
 

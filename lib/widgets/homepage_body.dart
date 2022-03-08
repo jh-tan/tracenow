@@ -5,8 +5,10 @@ import 'package:tracenow/services/ble_trace.dart';
 import 'package:tracenow/services/firebase_auth.dart';
 import 'package:tracenow/services/firebase_db.dart';
 import 'package:tracenow/widgets/category_menu_list.dart';
+import 'package:tracenow/widgets/dialog_box.dart';
 import 'package:tracenow/widgets/homepage_appbar.dart';
 import 'package:tracenow/widgets/snackbar.dart';
+import 'package:tracenow/widgets/text_input_dialog.dart';
 
 class HomepageBody extends StatefulWidget {
   const HomepageBody({Key? key}) : super(key: key);
@@ -31,6 +33,7 @@ class _HomepageBodyState extends State<HomepageBody> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Column(
         children: [
           HomepageAppBar(
@@ -48,9 +51,9 @@ class _HomepageBodyState extends State<HomepageBody> {
                   topLeft: Radius.circular(32.0),
                   topRight: Radius.circular(32.0),
                 )),
-            child: Column(
+            child: ListView(
               children: [
-                SizedBox(height: 5.h),
+                SizedBox(height: 2.h),
                 Row(children: [
                   Container(
                       margin: EdgeInsets.only(left: 5.w),
@@ -109,7 +112,12 @@ class _HomepageBodyState extends State<HomepageBody> {
                       title: 'Self Report',
                       icon: Icons.report,
                     ),
-                    onTap: () {},
+                    onTap: () {
+                      GlobalDialogBox().show(
+                          context,
+                          'By clicking agree, your assure that your report is true',
+                          FirebaseDatabase().updateReportStatus);
+                    },
                   ),
                 ),
                 SizedBox(height: 5.h),
@@ -119,7 +127,9 @@ class _HomepageBodyState extends State<HomepageBody> {
                       title: 'Upload Log',
                       icon: Icons.upload_file_outlined,
                     ),
-                    onTap: () {},
+                    onTap: () {
+                      GlobalTextBox().show(context);
+                    },
                   ),
                 )
               ],
