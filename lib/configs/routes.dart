@@ -13,7 +13,7 @@ class Routes {
       'HomePage': (_) => const Homepage(),
       'Login': (_) => const Login(),
       'OnBoard': (_) => const OnBoard(),
-      'History': (_) => const History(),
+      // 'History': (_) => const History(),
     };
   }
 
@@ -31,6 +31,12 @@ class Routes {
             builder: (_) => Register(
                   phoneNumber: args.phoneNumber,
                   userID: args.userID,
+                ));
+      case "/History":
+        final args = settings.arguments as UUIDArguments;
+        return MaterialPageRoute(
+            builder: (_) => History(
+                  uuid: args.uuid,
                 ));
       default:
         assert(false, 'Need to implement ${settings.name}');

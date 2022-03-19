@@ -63,7 +63,7 @@ class HistoryCard extends StatelessWidget {
               style: TextStyle(fontSize: 14.sp),
             ),
             Text(
-              Duration(seconds: int.parse(duration)).inMinutes > 0 ? "Medium" : "Low",
+              _calculateRisk(int.parse(duration)),
               style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold),
             )
               ],
@@ -80,5 +80,16 @@ class HistoryCard extends StatelessWidget {
     final minutesString = '$minutes'.padLeft(2, '0');
     final secondsString = '$seconds'.padLeft(2, '0');
     return '$minutesString min $secondsString sec';
+  }
+
+
+  String _calculateRisk(int seconds) {
+    if (seconds <= 900) {
+      return "Low Risk";
+    } else if (seconds <= 1800) {
+      return "Middle Risk";
+    } else {
+      return "High Risk";
+    }
   }
 }

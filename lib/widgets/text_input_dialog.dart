@@ -12,6 +12,7 @@ class GlobalTextBox {
             title: const Text('Enter the code'),
             content: TextField(
               controller: _textFieldController,
+              keyboardType: TextInputType.number,
               decoration: const InputDecoration(hintText: "Enter the code"),
             ),
             actions: <Widget>[

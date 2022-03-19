@@ -9,5 +9,10 @@ class UserArguments {
   final String userID;
   final String phoneNumber;
 
-  UserArguments(this.userID,this.phoneNumber);
+  UserArguments(this.userID, this.phoneNumber);
+}
+
+class UUIDArguments {
+  final String uuid;
+  UUIDArguments(this.uuid);
 }

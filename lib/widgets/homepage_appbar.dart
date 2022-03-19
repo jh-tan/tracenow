@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
+import 'package:tracenow/models/arguments.dart';
+import 'package:tracenow/screens/history.dart';
 import 'package:tracenow/services/firebase_auth.dart';
 
 class HomepageAppBar extends StatelessWidget {
@@ -53,7 +55,9 @@ class HomepageAppBar extends StatelessWidget {
                   color: Colors.black,
                   iconSize: 28.0,
                   onPressed: () {
-                    Navigator.pushNamed(context, 'History');
+                    // Navigator.pushNamed(context, 'History');
+                    Navigator.pushNamed(context, History.routeName,
+                        arguments: UUIDArguments(UserID!));
                   },
                 )),
           ]),

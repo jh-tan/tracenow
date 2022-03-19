@@ -42,6 +42,16 @@ class FirebaseDatabase {
     }
   }
 
+  Future<void> updateStatus(String? uid, String status) async {
+    _userCollection.doc(uid).update({'healthStatus': status}).then((value) => print("Updated"));
+  }
+
+  getCurrentUser(String docID) async {
+    DocumentSnapshot doc = await _userCollection.doc(docID).get();
+    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+    return data;
+  }
+
   Future<String> uploadLog(String code) async {
     String userID = FirebaseAuthentication().getCurrentUserID();
     bool isVerified = await _isVerify(code);
@@ -58,7 +68,9 @@ class FirebaseDatabase {
         batch.set(_userCollection.doc(userID).collection("encounterUser").doc(), log.toUploadMap());
       });
 
-      _userCollection.doc(userID).update({'healthStatus': 'Covid Positive '});
+      _userCollection
+          .doc(userID)
+          .update({'healthStatus': 'Covid Positive ', 'generatedCode': '', 'reportStatus': false});
       batch.commit();
       return "Log uploaded";
     }

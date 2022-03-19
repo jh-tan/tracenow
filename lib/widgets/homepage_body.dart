@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
 import 'package:tracenow/services/ble_trace.dart';
 import 'package:tracenow/services/firebase_auth.dart';
@@ -9,6 +10,8 @@ import 'package:tracenow/widgets/dialog_box.dart';
 import 'package:tracenow/widgets/homepage_appbar.dart';
 import 'package:tracenow/widgets/snackbar.dart';
 import 'package:tracenow/widgets/text_input_dialog.dart';
+
+import '../services/notification_service.dart';
 
 class HomepageBody extends StatefulWidget {
   const HomepageBody({Key? key}) : super(key: key);
@@ -27,7 +30,7 @@ class _HomepageBodyState extends State<HomepageBody> {
   @override
   void initState() {
     super.initState();
-    getUserID();
+    init();
   }
 
   @override
@@ -115,7 +118,7 @@ class _HomepageBodyState extends State<HomepageBody> {
                     onTap: () {
                       GlobalDialogBox().show(
                           context,
-                          'By clicking agree, your assure that your report is true',
+                          'By clicking agree, you assure that your report is true',
                           FirebaseDatabase().updateReportStatus);
                     },
                   ),
@@ -140,28 +143,89 @@ class _HomepageBodyState extends State<HomepageBody> {
     );
   }
 
-  Future getUserID() async {
+  String _formatDuration(int totalSeconds) {
+    final duration = Duration(seconds: totalSeconds);
+    final minutes = duration.inMinutes;
+    final seconds = totalSeconds % 60;
+
+    final minutesString = '$minutes'.padLeft(2, '0');
+    final secondsString = '$seconds'.padLeft(2, '0');
+    return '$minutesString min $secondsString sec';
+  }
+
+  String _calculateRisk(int seconds) {
+    if (seconds <= 900) {
+      return "Low Risk";
+    } else if (seconds <= 1800) {
+      return "Middle Risk";
+    } else {
+      return "High Risk";
+    }
+  }
+
+  Future init() async {
     final String documentID = FirebaseAuthentication().getCurrentUserID();
     CollectionReference users = FirebaseDatabase().getCollection();
-    // final SharedPreferences preferences = await SharedPreferences.getInstance();
-    users.doc(documentID).snapshots().listen((DocumentSnapshot documentSnapshot) {
-      if (documentSnapshot.exists) {
-        Map<String, dynamic> data = documentSnapshot.data() as Map<String, dynamic>;
-        // if (preferences.getString('UUID') == null) {
-        //   preferences.setString('UUID', data["UUID"]);
-        //   preferences.setString('status', data["health_status"]);
-        // }
-        // if (data["health_status"] == "Healthy") {
-        //   preferences.setString('status', data["health_status"]);
-        // }
+    final SharedPreferences preferences = await SharedPreferences.getInstance();
+    Map<String, dynamic> currentUser = await FirebaseDatabase().getCurrentUser(documentID);
 
-        setState(() {
-          userID = data["uuid"];
-          userStatus = data["healthStatus"];
-          name = data["name"];
-        });
-      }
+    setState(() {
+      userID = currentUser["uuid"];
+      userStatus = currentUser["healthStatus"];
+      name = currentUser["name"];
     });
+
+    Query<Map<String, dynamic>> reference =
+        FirebaseFirestore.instance.collectionGroup('encounterUser');
+    reference.snapshots().listen((querySnapshot) {
+      int? closeTime = preferences.getInt('lastNotification');
+      querySnapshot.docChanges.forEach((element) async {
+        if (element.doc['uuid'].toString().replaceAll('-', '') == userID &&
+            element.doc['timestamp'] > (closeTime ?? 0)) {
+          NotificationServices().showNotification(
+              'COVID - 19 ATTENTION',
+              'One of the person that you contacted with has turned positive\nContact Duration : ${_formatDuration(element.doc['duration'])}',
+              '');
+
+          String risk = _calculateRisk(element.doc['duration']);
+
+          if (risk == "High Risk" && userStatus != "Covid" && userStatus != "High Risk") {
+            FirebaseDatabase().updateStatus(documentID, risk);
+            preferences.setString('status', risk);
+            setState(() {
+              userStatus = risk;
+            });
+          } else if (risk == "Medium Risk" && userStatus != "High Risk" && userStatus != "Covid") {
+            FirebaseDatabase().updateStatus(documentID, risk);
+            preferences.setString('status', risk);
+            setState(() {
+              userStatus = risk;
+            });
+          } else if (risk == "Low Risk" && userStatus == "Healthy") {
+            FirebaseDatabase().updateStatus(documentID, risk);
+            preferences.setString('status', risk);
+            setState(() {
+              userStatus = risk;
+            });
+          }
+          preferences.setInt('lastNotification', element.doc['timestamp'] + 1000);
+        }
+      });
+    });
+
+    // users.doc(documentID).snapshots().listen((DocumentSnapshot documentSnapshot) {
+    //   if (documentSnapshot.exists) {
+    //     Map<String, dynamic> data = documentSnapshot.data() as Map<String, dynamic>;
+    //     // if (preferences.getString('UUID') == null) {
+    //     //   preferences.setString('UUID', data["UUID"]);
+    //     //   preferences.setString('status', data["health_status"]);
+    //     // }
+    //     // if (data["health_status"] == "Healthy") {
+    //     //   preferences.setString('status', data["health_status"]);
+    //     // }
+
+    //   }
+    // });
   }
 
   void _stateChange() async {
@@ -173,4 +237,5 @@ class _HomepageBodyState extends State<HomepageBody> {
       text = servicesIsRunning ? "The tracer is running" : "The tracer is not activated";
     });
   }
+
 }

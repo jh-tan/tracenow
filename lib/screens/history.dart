@@ -7,8 +7,10 @@ import 'package:sizer/sizer.dart';
 import 'package:tracenow/widgets/history_card.dart';
 
 class History extends StatefulWidget {
-  const History({Key? key}) : super(key: key);
+  const History({Key? key, required this.uuid}) : super(key: key);
 
+  static const routeName = '/History';
+  final String uuid;
   @override
   _HistoryState createState() => _HistoryState();
 }
@@ -62,36 +64,14 @@ class _HistoryState extends State<History> {
       print(e);
       return const Center(child: CircularProgressIndicator());
     }
-
-    // -----------------
-    // return Scaffold(
-    //   appBar: AppBar(
-    //     leading: IconButton(
-    //       onPressed: () => Navigator.pop(context),
-    //       icon: const Icon(Icons.arrow_back_ios_outlined, color: Colors.black),
-    //     ),
-    //     title: const Text('Risk History'),
-    //     elevation: 0,
-    //     backgroundColor: Colors.transparent,
-    //     centerTitle: true,
-    //   ),
-    //   body: ListView.builder(
-    //     itemBuilder: (BuildContext context, int index) {
-    //       return ExpandableTiles(
-    //           date: riskHistory[index].date,
-    //           distance: riskHistory[index].distance.toString(),
-    //           duration: riskHistory[index].duration.toString(),
-    //           proximity: riskHistory[index].proximity);
-    //     },
-    //     itemCount: riskHistory.length,
-    //   ),
-    // );
   }
 
   Future<QuerySnapshot> _getAllHistory() async {
     // SharedPreferences prefs = await SharedPreferences.getInstance();
     // final String? UUID = prefs.getString('UUID');
-    const String? UUID = "B7E091D4FD89DB9168F6675F3020748E";
+    // const String? UUID = "B7E091D4FD89DB9168F6675F3020748E";
+    String? UUID = widget.uuid;
+    print(UUID);
 
     return await FirebaseFirestore.instance
         .collectionGroup('encounterUser')
