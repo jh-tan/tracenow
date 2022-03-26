@@ -212,20 +212,6 @@ class _HomepageBodyState extends State<HomepageBody> {
         }
       });
     });
-
-    // users.doc(documentID).snapshots().listen((DocumentSnapshot documentSnapshot) {
-    //   if (documentSnapshot.exists) {
-    //     Map<String, dynamic> data = documentSnapshot.data() as Map<String, dynamic>;
-    //     // if (preferences.getString('UUID') == null) {
-    //     //   preferences.setString('UUID', data["UUID"]);
-    //     //   preferences.setString('status', data["health_status"]);
-    //     // }
-    //     // if (data["health_status"] == "Healthy") {
-    //     //   preferences.setString('status', data["health_status"]);
-    //     // }
-
-    //   }
-    // });
   }
 
   void _stateChange() async {
