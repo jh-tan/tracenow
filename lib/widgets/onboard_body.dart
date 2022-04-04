@@ -33,6 +33,7 @@ class _OnBoardBodyState extends State<OnBoardBody> {
                 },
                 itemCount: OnBoardData.length,
                 itemBuilder: (context, index) => OnBoardContent(
+                      title: OnBoardData[index]["title"],
                       text: OnBoardData[index]["text"],
                       image: OnBoardData[index]["image"],
                     )),
