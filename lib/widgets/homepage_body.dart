@@ -26,6 +26,7 @@ class _HomepageBodyState extends State<HomepageBody> {
   String text = "The tracer is not activated";
   bool servicesIsRunning = false;
   final TracingServices tracingServices = TracingServices();
+  final String documentID = FirebaseAuthentication().getCurrentUserID();
 
   @override
   void initState() {
@@ -130,7 +131,7 @@ class _HomepageBodyState extends State<HomepageBody> {
                       title: 'Upload Log',
                       icon: Icons.upload_file_outlined,
                     ),
-                    onTap: () {
+                    onTap: () async {
                       GlobalTextBox().show(context);
                     },
                   ),
@@ -164,15 +165,17 @@ class _HomepageBodyState extends State<HomepageBody> {
   }
 
   Future init() async {
-    final String documentID = FirebaseAuthentication().getCurrentUserID();
     CollectionReference users = FirebaseDatabase().getCollection();
     final SharedPreferences preferences = await SharedPreferences.getInstance();
-    Map<String, dynamic> currentUser = await FirebaseDatabase().getCurrentUser(documentID);
-
-    setState(() {
-      userID = currentUser["uuid"];
-      userStatus = currentUser["healthStatus"];
-      name = currentUser["name"];
+    users.doc(documentID).snapshots().listen((DocumentSnapshot documentSnapshot) {
+      if (documentSnapshot.exists) {
+        Map<String, dynamic> currentUser = documentSnapshot.data() as Map<String, dynamic>;
+        setState(() {
+          userID = currentUser["uuid"];
+          userStatus = currentUser["healthStatus"];
+          name = currentUser["name"];
+        });
+      }
     });
 
     Query<Map<String, dynamic>> reference =
@@ -223,5 +226,4 @@ class _HomepageBodyState extends State<HomepageBody> {
       text = servicesIsRunning ? "The tracer is running" : "The tracer is not activated";
     });
   }
-
 }

@@ -14,6 +14,7 @@ class GlobalTextBox {
               controller: _textFieldController,
               keyboardType: TextInputType.number,
               decoration: const InputDecoration(hintText: "Enter the code"),
+              maxLength: 6,
             ),
             actions: <Widget>[
               ElevatedButton(
