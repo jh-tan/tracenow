@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 
 class CategoryMenu extends StatelessWidget {
-  const CategoryMenu({Key? key, required this.title , required this.icon, this.color = Colors.white })
+  const CategoryMenu({Key? key, required this.title, required this.icon, this.color = Colors.white})
       : super(key: key);
 
   final String title;
@@ -34,9 +34,12 @@ class CategoryMenu extends StatelessWidget {
                     ),
                     const SizedBox(height: 15),
                     Center(
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
                         child: Text(
-                      title,
-                      style: const TextStyle(fontSize: 24),
+                          title,
+                          style: const TextStyle(fontSize: 22),
+                        ),
                     )),
                   ],
                 ),

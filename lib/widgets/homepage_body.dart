@@ -24,7 +24,7 @@ class _HomepageBodyState extends State<HomepageBody> {
   String userID = '', userStatus = '', name = '';
   Color? iconColor = Colors.black, bgColor = Colors.red;
   String text = "The tracer is not activated";
-  bool servicesIsRunning = false;
+  bool servicesIsRunning = false, declaredPositve = false;
   final TracingServices tracingServices = TracingServices();
   final String documentID = FirebaseAuthentication().getCurrentUserID();
 
@@ -112,28 +112,37 @@ class _HomepageBodyState extends State<HomepageBody> {
                 SizedBox(height: 5.h),
                 Center(
                   child: GestureDetector(
-                    child: const CategoryMenu(
-                      title: 'Self Report',
+                    child: CategoryMenu(
+                      title: 'Self Declare Covid Positive',
                       icon: Icons.report,
+                      color: !declaredPositve && userStatus.trim() != 'Covid Positive'
+                          ? Colors.white
+                          : const Color.fromARGB(255, 180, 180, 180),
                     ),
-                    onTap: () {
-                      GlobalDialogBox().show(
-                          context,
-                          'By clicking agree, you assure that your report is true',
-                          FirebaseDatabase().updateReportStatus);
-                    },
+                    onTap: !declaredPositve && userStatus != 'Covid Positive'
+                        ? () {
+                            GlobalDialogBox().show(
+                                context,
+                                'By clicking agree, you assure that your report is true',
+                                FirebaseDatabase().updateReportStatus);
+                          }
+                        : null,
                   ),
                 ),
                 SizedBox(height: 5.h),
                 Center(
                   child: GestureDetector(
-                    child: const CategoryMenu(
+                    child: CategoryMenu(
                       title: 'Upload Log',
                       icon: Icons.upload_file_outlined,
+                      color:
+                          declaredPositve ? Colors.white : const Color.fromARGB(255, 180, 180, 180),
                     ),
-                    onTap: () async {
-                      GlobalTextBox().show(context);
-                    },
+                    onTap: declaredPositve
+                        ? () async {
+                            GlobalTextBox().show(context);
+                          }
+                        : null,
                   ),
                 )
               ],
@@ -174,6 +183,7 @@ class _HomepageBodyState extends State<HomepageBody> {
           userID = currentUser["uuid"];
           userStatus = currentUser["healthStatus"];
           name = currentUser["name"];
+          declaredPositve = currentUser["reportStatus"];
         });
       }
     });

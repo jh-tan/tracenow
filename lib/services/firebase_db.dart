@@ -14,8 +14,8 @@ class FirebaseDatabase {
       FirebaseFirestore.instance.collection('encounterUser');
   final DatabaseHelper db = DatabaseHelper.instance;
 
-  Future<void> registerUser(String uid, String name, String phoneNo) async {
-    _userCollection.doc(uid).set(User(name: name, phoneNo: phoneNo).toMap());
+  Future<void> registerUser(String uid, String name, String nric, String phoneNo) async {
+    _userCollection.doc(uid).set(User(name: name, nric: nric, phoneNo: phoneNo).toMap());
   }
 
   Future<bool> isExist(String uid) async {
@@ -60,20 +60,16 @@ class FirebaseDatabase {
       return "Invalid Code!";
     }
 
-    if (encounterLog.isEmpty) {
-      return "No encounter log in the device";
-    } else {
-      WriteBatch batch = FirebaseFirestore.instance.batch();
-      encounterLog.forEach((log) async {
-        batch.set(_userCollection.doc(userID).collection("encounterUser").doc(), log.toUploadMap());
-      });
+    WriteBatch batch = FirebaseFirestore.instance.batch();
+    encounterLog.forEach((log) async {
+      batch.set(_userCollection.doc(userID).collection("encounterUser").doc(), log.toUploadMap());
+    });
 
-      _userCollection
-          .doc(userID)
-          .update({'healthStatus': 'Covid Positive ', 'generatedCode': '', 'reportStatus': false});
-      batch.commit();
-      return "Log uploaded";
-    }
+    _userCollection
+        .doc(userID)
+        .update({'healthStatus': 'Covid Positive', 'generatedCode': '', 'reportStatus': false});
+    batch.commit();
+    return "Log uploaded";
   }
 
   Future<void> updateReportStatus() {
